@@ -420,10 +420,20 @@ function sbNameKey(n){ return String(n||"").normalize("NFD").replace(/[̀-ͯ]/g,
   try{ PICKERS=JSON.parse(localStorage.getItem(KEY+'-pickers')||'[]'); }catch(e){ PICKERS=[]; }
 
   /* ---------- scannen ---------- */
+  /* controle: een WO is maximaal 10 cijfers, een warehouse task (taak) heeft 11 cijfers */
+  var WO_MAX=10, TASK_LEN=11;
+  function woCheck(v){
+    if(!/^\d+$/.test(v)) return '"'+v+'" is geen WO-nummer (alleen cijfers) en ook geen gekende picker.';
+    var n=normWo(v);
+    if(v.length===TASK_LEN||n.length===TASK_LEN) return v+' heeft '+TASK_LEN+' cijfers: dat is een taak (warehouse task), geen WO. Scan de barcode van de WO.';
+    if(n.length>WO_MAX) return v+' is te lang ('+n.length+' cijfers). Een WO heeft maximaal '+WO_MAX+' cijfers.';
+    return '';
+  }
   function handleScan(raw){
     var v=String(raw||'').trim(); if(!v) return;
     var p=findPicker(v);
     if(p&&!/^\d+$/.test(v)){ usePicker(p); render(); msg('Picker '+p.naam+' is nu actief.','ok'); return; }
+    var chk=woCheck(v); if(chk){ msg(chk,'bad'); return; }
     var ap=activeP();
     if(!ap){ msg('Kies eerst een picker of scan zijn badge.','bad'); return; }
     var wo=normWo(v), dup=null;
