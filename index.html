@@ -3,15 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#00296b">
+<meta name="theme-color" content="#260aff">
 <title>WO's scannen per picker</title>
 <style>
   /* palet: imperial blue #00296b · french blue #003f88 · steel azure #00509d · school bus yellow #fdc500 · gold #ffd500 (+ rood enkel voor fouten) */
   :root{--imperial:#00296b;--french:#003f88;--azure:#00509d;--yellow:#fdc500;--gold:#ffd500;--red:#d62839;
     --bg:#eef3fa;--card:#fff;--line:#d3deee;--txt:var(--imperial);--mut:#5a6b8a;--acc:var(--french);--ok:var(--azure);--warn:#7a5c00;--bad:#b3192a}
   *{box-sizing:border-box}
-  body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--txt)}
-  header{background:linear-gradient(90deg,var(--imperial),var(--french) 60%,var(--azure));color:#fff;border-bottom:4px solid var(--yellow);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  body{margin:0;font-family:Segoe UI,Arial,sans-serif;color:var(--txt);min-height:100vh;
+    background:hsl(247,100%,52%);}
+  /* achtergrond-verloop (vast, ook op iPhone waar background-attachment:fixed niet werkt) */
+  body::before{content:"";position:fixed;inset:0;z-index:-1;
+    background:hsl(247,100%,52%);
+    background:linear-gradient(180deg,hsla(247,100%,52%,1) 0%,hsla(250,76%,57%,1) 27%,hsla(277,67%,77%,1) 61%,hsla(218,88%,59%,1) 100%)}
+  header{background:rgba(0,41,107,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;border-bottom:4px solid var(--yellow);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   header h1{font-size:18px;margin:0}
   header .stats{font-size:14px;opacity:.95;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
   .sync{background:rgba(255,255,255,.14);border-radius:12px;padding:3px 10px;font-size:13px;white-space:nowrap}
@@ -19,7 +24,7 @@
   .sync.on i{background:#7fd1ff}.sync.wait i{background:var(--gold)}.sync.off i{background:#ff7b88}
   main{display:grid;grid-template-columns:340px 1fr;gap:16px;padding:16px;max-width:1300px;margin:0 auto}
   @media(max-width:850px){main{grid-template-columns:1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
+  .card{background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.6);border-radius:12px;padding:14px;box-shadow:0 8px 24px rgba(20,10,90,.18)}
   .card h2{font-size:14px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
   label{font-size:13px;color:var(--mut);display:block;margin:10px 0 4px}
   label.chk{display:flex;gap:6px;align-items:center;margin:6px 0 0}
