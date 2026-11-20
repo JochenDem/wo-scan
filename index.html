@@ -127,7 +127,7 @@
         <input type="text" id="newPicker" placeholder="naam of processor-code" autocomplete="off">
         <button id="addPicker">Toevoegen</button>
       </div>
-      <div class="hint">Alleen mensen van ploeg 100 (tabel <i>gebruikers</i>). Scan je de badge of processor-code van een picker, dan wordt die picker meteen actief.</div>
+      <div class="hint">De lijst toont de pickers van ploeg 100 die de laatste 30 dagen gepickt hebben; wie weinig of niet recent pickte staat onderaan bij <i>Twijfel</i>. Iemand anders van ploeg 100 vind je via het zoekveld of door zijn badge te scannen.</div>
     </div>
     <div class="card" style="margin-top:16px">
       <h2>2. Scan WO</h2>
@@ -221,7 +221,8 @@ function sbNameKey(n){ return String(n||"").normalize("NFD").replace(/[̀-ͯ]/g,
   var scan=$('scan');
   var TOUCH=navigator.maxTouchPoints>0&&!(window.matchMedia&&window.matchMedia('(pointer:fine)').matches);
   function foc(){ if(!TOUCH) scan.focus(); }   // op gsm/tablet het toetsenbord niet telkens openen
-  var USERS=[];            // uit gebruikers: {id,naam,ploeg}
+  var USERS=[];            // alle codes van ploeg 100 (gebruikers): {id,naam,ploeg} — voor zoeken en badge
+  var PICKERS=[];          // keuzelijst (view picker_lijst): {naam,groep:'actief'|'twijfel',codes,laatste_pick}
   var state=load();        // {pickers:[{naam,code}], active:naam, scans:[{wo,picker,code,ts,st:'ok'|'wacht'|'weg'}], hidden:[wo]}
 
   function load(){
@@ -295,9 +296,11 @@ function sbNameKey(n){ return String(n||"").normalize("NFD").replace(/[̀-ͯ]/g,
     var o0=document.createElement('option'); o0.value=''; o0.textContent='— kies een picker —'; sel.appendChild(o0);
     var seen={}, list=[];
     state.pickers.forEach(function(p){ seen[sbNameKey(p.naam)]=1; list.push({naam:p.naam,grp:'Gebruikt'}); });
-    USERS.forEach(function(u){ var k=sbNameKey(u.naam); if(seen[k]) return; seen[k]=1; list.push({naam:u.naam,grp:'Ploeg 100'}); });
+    var G_ACT='Pickers ploeg 100', G_TW='Twijfel · weinig of niet recent gepickt';
+    if(PICKERS.length) PICKERS.forEach(function(u){ var k=sbNameKey(u.naam); if(seen[k]) return; seen[k]=1; list.push({naam:u.naam,grp:u.groep==='actief'?G_ACT:G_TW}); });
+    else USERS.forEach(function(u){ var k=sbNameKey(u.naam); if(seen[k]) return; seen[k]=1; list.push({naam:u.naam,grp:'Ploeg 100'}); });
     var groups={}; list.forEach(function(x){ (groups[x.grp]=groups[x.grp]||[]).push(x); });
-    Object.keys(groups).forEach(function(g){
+    ['Gebruikt',G_ACT,'Ploeg 100',G_TW].filter(function(g){return groups[g]}).forEach(function(g){
       var og=document.createElement('optgroup'); og.label=g;
       groups[g].sort(function(a,b){return g==='Gebruikt'?0:a.naam.localeCompare(b.naam)}).forEach(function(x){
         var o=document.createElement('option'); o.value=x.naam; o.textContent=x.naam; if(x.naam===state.active) o.selected=true; og.appendChild(o); });
@@ -397,11 +400,13 @@ function sbNameKey(n){ return String(n||"").normalize("NFD").replace(/[̀-ͯ]/g,
   }
   async function loadUsers(){
     if(!sbRead()) return;
+    try{ PICKERS=(await sbRest('picker_lijst?select=naam,groep,codes,laatste_pick&order=naam'))||[]; try{ localStorage.setItem(KEY+'-pickers',JSON.stringify(PICKERS)); }catch(e){} }catch(e){}
     try{ USERS=(await sbRest('gebruikers?select=id,naam,ploeg&ploeg=eq.100&order=naam'))||[]; USERS=USERS.filter(function(u){return u.naam});
       state.pickers=state.pickers.filter(function(p){ return !!userByKey(p.code||p.naam)||!!userByKey(p.naam); }); if(state.active&&!activeP()) state.active=null; save();
       try{ localStorage.setItem(KEY+'-users',JSON.stringify(USERS)); }catch(e){} render(); }catch(e){}
   }
   try{ USERS=JSON.parse(localStorage.getItem(KEY+'-users')||'[]').filter(function(u){return String(u.ploeg)==='100'}); }catch(e){ USERS=[]; }
+  try{ PICKERS=JSON.parse(localStorage.getItem(KEY+'-pickers')||'[]'); }catch(e){ PICKERS=[]; }
 
   /* ---------- scannen ---------- */
   function handleScan(raw){
