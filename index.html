@@ -301,6 +301,8 @@ function sbNameKey(n){ return String(n||"").normalize("NFD").replace(/[̀-ͯ]/g,
   /* vaste volgorde bovenaan het keuzemenu; de andere actieve pickers volgen alfabetisch */
   var VOORAAN=['Marnick Beelprez','Michael Damman','Kiril Polechuk','Zakaria Sall','Adam Lisiewicz','Igor Nim'].map(sbNameKey);
   function vooraan(n){ var i=VOORAAN.indexOf(sbNameKey(n)); return i<0?99:i; }
+  /* altijd in de keuzelijst, ook als de picker de drempel van 'actief' (20 lijnen/30 dagen) niet haalt */
+  var ALTIJD=['Nazmi Bajrami'].map(sbNameKey);
   /* ---------- weergave ---------- */
   function render(){
     var sel=$('pickerSel'); sel.innerHTML='';
@@ -308,7 +310,7 @@ function sbNameKey(n){ return String(n||"").normalize("NFD").replace(/[̀-ͯ]/g,
     var seen={}, list=[];
     state.pickers.forEach(function(p){ seen[sbNameKey(p.naam)]=1; list.push({naam:p.naam,grp:'Gebruikt'}); });
     var G_ACT='Pickers ploeg 100', G_TW='Twijfel · weinig of niet recent gepickt';
-    if(PICKERS.length) PICKERS.filter(function(u){return u.groep==='actief'}).forEach(function(u){ var k=sbNameKey(u.naam); if(seen[k]) return; seen[k]=1; list.push({naam:u.naam,grp:G_ACT}); });
+    if(PICKERS.length) PICKERS.filter(function(u){return u.groep==='actief'||ALTIJD.indexOf(sbNameKey(u.naam))>=0}).forEach(function(u){ var k=sbNameKey(u.naam); if(seen[k]) return; seen[k]=1; list.push({naam:u.naam,grp:G_ACT}); });
     else USERS.forEach(function(u){ var k=sbNameKey(u.naam); if(seen[k]) return; seen[k]=1; list.push({naam:u.naam,grp:'Ploeg 100'}); });
     var groups={}; list.forEach(function(x){ (groups[x.grp]=groups[x.grp]||[]).push(x); });
     ['Gebruikt',G_ACT,'Ploeg 100',G_TW].filter(function(g){return groups[g]}).forEach(function(g){
