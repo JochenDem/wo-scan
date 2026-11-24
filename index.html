@@ -458,7 +458,7 @@ function sbNameKey(n){ return String(n||"").normalize("NFD").replace(/[̀-ͯ]/g,
     save(); render(); msg('WO '+s.wo+' van '+s.picker+' weggehaald.','warn'); pushAll();
   }
 
-  var idleTimer=null, IDLE_MS=120;
+  var idleTimer=null, IDLE_MS=30000;
   function submitScan(){ clearTimeout(idleTimer); idleTimer=null; var v=scan.value; scan.value=''; handleScan(v); }
   scan.addEventListener('input',function(){ clearTimeout(idleTimer); if(scan.value.trim()) idleTimer=setTimeout(submitScan,IDLE_MS); });
   scan.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key==='Tab'){ e.preventDefault(); submitScan(); } });
