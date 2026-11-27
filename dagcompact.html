@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#260aff">
+<title>Dagcompact · ploeg 100</title>
+<style>
+  :root{--ink:#1f2933;--muted:#6b7682;--line:#e4e7eb;--soft:#f5f7f9;--pick:#2c5282;--green:#2f855a;--red:#c53030;--red-soft:#fde2e2;--yellow:#fdc500}
+  *{box-sizing:border-box}
+  html{background:hsl(247,100%,52%)}
+  body{margin:0;min-height:100vh;color:var(--ink);font:14px/1.45 "Segoe UI",Helvetica,Arial,sans-serif;padding:18px 12px}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;background:hsl(247,100%,52%);
+    background:linear-gradient(180deg,hsla(247,100%,52%,1) 0%,hsla(250,76%,57%,1) 27%,hsla(277,67%,77%,1) 61%,hsla(218,88%,59%,1) 100%)}
+  .wrap{max-width:980px;margin:0 auto;background:rgba(255,255,255,.97);border-radius:20px;box-shadow:0 18px 50px rgba(20,10,90,.28);padding:18px 20px 22px}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+  h1{font-size:22px;margin:0;font-weight:600;letter-spacing:-.2px}
+  h1 .pl{font-size:13px;font-weight:700;background:#2f5688;color:#fff;border-radius:8px;padding:2px 9px;margin-left:8px;vertical-align:3px}
+  .datum{color:var(--muted);margin:2px 0 0;font-size:14px}
+  .datum::first-letter{text-transform:uppercase}
+  .cijfers{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .cijfer{background:var(--soft);border-radius:10px;padding:6px 12px;font-size:12px;color:var(--muted)}
+  .cijfer b{display:block;font-size:22px;color:var(--ink);line-height:1.1}
+  .cijfer.pk b{color:#1d5e2a}.cijfer.af b{color:var(--red)}
+  .sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
+  .sync i{display:inline-block;width:9px;height:9px;border-radius:50%;background:#9fb0cc}
+  .sync.on i{background:var(--green)}.sync.wait i{background:#e0a800}.sync.off i{background:var(--red)}
+  .btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:6px 12px;font:inherit;cursor:pointer}
+  .btn:hover{background:var(--soft)}.btn.pri{background:var(--pick);border-color:var(--pick);color:#fff}
+  .btn.sm{padding:2px 8px;font-size:12px}
+  .kols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px;align-items:start}
+  @media(max-width:760px){.kols{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:480px){body{padding:8px 6px}.wrap{border-radius:14px;padding:14px 12px}.kols{grid-template-columns:1fr}}
+  .kol{border:1px solid var(--line);border-top:4px solid #8a93a3;border-radius:10px;background:#fff;overflow:hidden;box-shadow:0 3px 10px rgba(20,35,60,.10)}
+  .kol h4{margin:0;padding:6px 10px;font-size:.85em;display:flex;justify-content:space-between;background:var(--soft)}
+  .kol h4 .n{color:var(--muted);font-weight:600}
+  .kol ul{list-style:none;margin:0;padding:0}
+  .kol li{padding:5px 10px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.92em}
+  .kol li b{font-weight:600}
+  .kol.k-leid{border-top-color:#2f5688}.kol.k-pick{border-top-color:#5cb865}.kol.k-bekl{border-top-color:#5867d6}.kol.k-verp{border-top-color:#9b6fd0}
+  .kol.k-laad{border-top-color:#c98a4b}.kol.k-inb{border-top-color:#3bb5bb}.kol.k-ctrl{border-top-color:#d9619d}
+  .kol.k-afw{background:rgba(217,83,79,.10);border-color:rgba(217,83,79,.55);border-top-color:#d9534f}
+  .kol.k-afw h4{background:rgba(217,83,79,.2);color:#9e2b27}.kol.k-afw li{border-top-color:rgba(217,83,79,.28)}
+  .tag{font-size:11px;font-weight:600;padding:1px 7px;border-radius:9px;white-space:nowrap}
+  .tag.werk{background:#eceff3;color:var(--ink)}.tag.vrij{background:#fcefa8;color:#6b5300}.tag.ziek{background:#cfe0f7;color:#1e3a64}.tag.afw{background:var(--red-soft);color:var(--red)}
+  .tag.t-pick{background:#c6ebc9;color:#1d5e2a}.tag.t-bekl{background:#d9defc;color:#2c3790}.tag.t-verp{background:#e5d6f7;color:#533089}.tag.t-koer{background:#ffd8b0;color:#8a3f00}
+  .tag.t-laden{background:#e3cfbd;color:#5f3a1c}.tag.t-inb{background:#bfeaec;color:#10595e}.tag.t-eind{background:#f9cfe3;color:#8e1f57}.tag.t-rew{background:#3d4a63;color:#fff}
+  .leeg{margin-top:10px;font-size:12.5px;color:var(--muted)}
+  .msg{margin-top:16px;padding:12px 14px;border-radius:10px;background:#e8f1fb;color:#1e3a64}
+  .msg.bad{background:var(--red-soft);color:#822727}
+  .login{margin-top:16px;max-width:340px}
+  .login label{display:block;font-size:12px;color:var(--muted);margin:8px 0 3px}
+  .login input{width:100%;font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:8px}
+  .login .btn{margin-top:12px;width:100%;padding:10px}
+  .err{color:var(--red);font-size:13px;margin-top:8px;min-height:1em}
+  .voet[hidden]{display:none}
+  .voet{margin-top:16px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+  @media print{body{padding:0;background:#fff}body::before{display:none}.wrap{box-shadow:none;padding:0}.sync,.voet button{display:none}.kol,.tag{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Bezetting<span class="pl">Ploeg 100</span></h1>
+      <p class="datum" id="datum"></p>
+    </div>
+    <span class="sync off" id="sync"><i></i><span>niet ingelogd</span></span>
+  </div>
+  <div id="inhoud"></div>
+  <div class="voet" id="voet" hidden><span id="stand"></span><span><button class="btn sm" id="ververs">↻ Verversen</button> <button class="btn sm" id="uit">Uitloggen</button></span></div>
+</div>
+<script>
+/* ---- Supabase work-sap: kleine client zonder bibliotheek (zelfde sessie "worksap_sessie" als de WO-scanpagina) ---- */
+const SB={url:"https://xrqsvqwsotsoocfrplns.supabase.co",key:"sb_publishable_qrVQegKv235Uk1D9bHTFEg_MyGKyM1X",LS:"worksap_sessie"};
+function sbRead(){try{return JSON.parse(localStorage.getItem(SB.LS)||"null");}catch(e){return SB.mem||null;}}
+function sbWrite(s){SB.mem=s;try{if(s)localStorage.setItem(SB.LS,JSON.stringify(s));else localStorage.removeItem(SB.LS);}catch(e){}}
+function sbKeep(j){const s={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:j.expires_at||Math.floor(Date.now()/1000)+(j.expires_in||3600),email:(j.user&&j.user.email)||(sbRead()||{}).email||""};sbWrite(s);return s;}
+async function sbAuth(grant,body){
+  const r=await fetch(SB.url+"/auth/v1/token?grant_type="+grant,{method:"POST",headers:{apikey:SB.key,"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error_description||j.msg||j.message||("inloggen mislukt ("+r.status+")"));return sbKeep(j);}
+let sbRefreshing=null;
+async function sbToken(force){
+  const s=sbRead();if(!s)return null;if(!force&&s.expires_at-90>Date.now()/1000)return s.access_token;
+  if(!sbRefreshing)sbRefreshing=(async()=>{const cur=sbRead();if(!cur)return null;if(!force&&cur.expires_at-90>Date.now()/1000)return cur.access_token;
+    try{return(await sbAuth("refresh_token",{refresh_token:cur.refresh_token})).access_token;}
+    catch(e){const again=sbRead();if(again&&again.refresh_token!==cur.refresh_token)return again.access_token;sbWrite(null);return null;}})().finally(()=>{sbRefreshing=null;});
+  return sbRefreshing;}
+async function sbRest(path){
+  for(let poging=0;poging<2;poging++){
+    const tok=await sbToken(poging>0);if(!tok){const e=new Error("niet ingelogd");e.status=401;throw e;}
+    const r=await fetch(SB.url+"/rest/v1/"+path,{headers:{apikey:SB.key,Authorization:"Bearer "+tok}});
+    if(r.status===401&&poging===0)continue;
+    const t=await r.text();let j=null;try{j=t?JSON.parse(t):null;}catch(e){}
+    if(!r.ok){const e=new Error((j&&(j.message||j.details))||("fout "+r.status));e.status=r.status;throw e;}
+    return j;}}
+
+/* ---- weergave ---- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+/* tegels in dezelfde volgorde en kleuren als de dagplanning */
+const TEGELS=[['k-leid','Leiding'],['k-pick','Picking'],['k-bekl','Bekleving (HP / BK)'],['k-laad','Laden & koer'],['k-verp','Verpakking'],['k-inb','Inbound'],
+  ['k-ctrl','Eindcontrole & rework'],['k-over','Andere taken'],['k-leeg','Geen taak ingevuld'],['k-afw','Afwezig']];
+const TAKEN=[['t-pick',/picking(?!\s*-?\s*planner)/],['t-bekl',/\bhp\b|\bbk\b|bekleving/],['t-verp',/verpak|\bvp\b|c\.v\.p/],['t-koer',/koer/],['t-laden',/laden/],['t-inb',/inbound/],['t-eind',/eindcontrole/],['t-rew',/rework/]];
+function tagK(t){const s=t.toLowerCase();if(s.includes('ziek'))return'ziek';if(/^(verlof|tk|bf)\b/.test(s))return'vrij';if(/afwezig/.test(s))return'afw';
+  let beste='werk',plek=1e9;for(const [c,re] of TAKEN){const i=s.search(re);if(i>=0&&i<plek){plek=i;beste=c;}}return beste;}
+const rang=x=>/brigadier/i.test(x.taak)?0:/planner/i.test(x.taak)?1:/dockman/i.test(x.taak)?2:3;
+let rijen=null,fout='',laatst=0,bezig=false;
+const vandaag=()=>iso(new Date());
+
+function toon(){
+  $('datum').textContent=new Date().toLocaleDateString('nl-BE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const s=sbRead(),el=$('sync');
+  el.className='sync '+(!s?'off':fout?'wait':'on');
+  el.lastChild.textContent=!s?'niet ingelogd':bezig?'laden…':fout?fout:'bijgewerkt '+new Date(laatst).toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'});
+  $('voet').hidden=!s;
+  if(!s){
+    $('inhoud').innerHTML='<div class="login"><div class="msg">Log in op de database work-sap (zelfde account als de WO-scanpagina).</div>'+
+      '<label>E-mail</label><input type="email" id="lgMail" autocomplete="username"><label>Wachtwoord</label><input type="password" id="lgPw" autocomplete="current-password">'+
+      '<button class="btn pri" id="lgIn">Inloggen</button><div class="err" id="lgErr"></div></div>';
+    const go=async()=>{$('lgErr').textContent='';try{await sbAuth("password",{email:$('lgMail').value.trim(),password:$('lgPw').value});haal();}catch(e){$('lgErr').textContent=e.message;}};
+    $('lgIn').onclick=go;$('lgPw').onkeydown=e=>{if(e.key==='Enter')go();};
+    return;
+  }
+  if(!rijen){$('inhoud').innerHTML=fout?'<div class="msg bad">'+esc(fout)+'</div>':'<div class="msg">Bezetting laden…</div>';return;}
+  if(!rijen.length){$('inhoud').innerHTML='<div class="msg">Nog geen bezetting voor vandaag in de database. Open <b>Dagplanning_vandaag.html</b> op de pc en lees Transport&amp;Picking.xlsx in: de bezetting van vandaag wordt dan automatisch verstuurd.</div>';$('stand').textContent='';return;}
+  const aanw=rijen.filter(x=>!x.afwezig),pick=rijen.filter(x=>x.groep==='Picking');
+  let h='<div class="cijfers"><div class="cijfer"><b>'+aanw.length+'</b>aanwezig</div><div class="cijfer pk"><b>'+pick.length+'</b>op picking</div><div class="cijfer af"><b>'+(rijen.length-aanw.length)+'</b>afwezig</div></div><div class="kols">';
+  const leeg=[];
+  for(const [c,n] of TEGELS){
+    const g=rijen.filter(x=>x.groep===n).sort((a,b)=>rang(a)-rang(b)||a.naam.localeCompare(b.naam,'nl'));
+    if(!g.length){if(c!=='k-leeg'&&c!=='k-afw'&&c!=='k-over')leeg.push(n);continue;}
+    h+='<div class="kol '+c+'"><h4><span>'+esc(n)+'</span><span class="n">'+g.length+'</span></h4><ul>'+
+      g.map(x=>'<li><b>'+esc(x.naam)+'</b>'+(x.taak?'<span class="tag '+tagK(x.taak)+'">'+esc(x.taak)+'</span>':'')+'</li>').join('')+'</ul></div>';
+  }
+  h+='</div>'+(leeg.length?'<p class="leeg">Niemand op: '+leeg.map(esc).join(', ')+'</p>':'');
+  $('inhoud').innerHTML=h;
+  const t=Math.max(...rijen.map(x=>Date.parse(x.bijgewerkt)||0));
+  $('stand').textContent='Bezetting uit de weekplanning, verstuurd door de dagplanning om '+new Date(t).toLocaleString('nl-BE',{weekday:'short',hour:'2-digit',minute:'2-digit'});
+}
+async function haal(){
+  if(!sbRead()||bezig){toon();return;}
+  bezig=true;toon();
+  try{rijen=await sbRest('bezetting?select=naam,taak,groep,afwezig,bijgewerkt&ploeg=eq.PL100&datum=eq.'+vandaag());fout='';laatst=Date.now();}
+  catch(e){fout=e.status===401?'opnieuw inloggen':(e.message||'fout');if(e.status===401){sbWrite(null);rijen=null;}}
+  bezig=false;toon();
+}
+$('ververs').onclick=haal;
+$('uit').onclick=async()=>{const t=sbRead();sbWrite(null);rijen=null;toon();if(t)try{await fetch(SB.url+"/auth/v1/logout",{method:"POST",headers:{apikey:SB.key,Authorization:"Bearer "+t.access_token}});}catch(e){}};
+/* elke 2 minuten verversen, meteen bij terugkeer naar het tabblad, en bij een nieuwe dag */
+let dag=vandaag();
+setInterval(()=>{if(vandaag()!==dag){dag=vandaag();rijen=null;}haal();},120000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-laatst>30000)haal();});
+haal();
+</script>
+</body>
+</html>
